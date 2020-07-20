@@ -26,8 +26,8 @@ The project was created by following the tutorial given [here](https://wyag.thb.
 
 A quick look at the files in the project
 
-1. ** pvc ** : This file contains the executable for the project.
-2. ** libpvc.py ** : This python file defines the functionality of the project.
-3. ** README.md ** : This is the file you're reading right now. :)
+1. **pvc**: This file contains the executable for the project.
+2. **libpvc.py**: This python file defines the functionality of the project.
+3. **README.md**: This is the file you're reading right now. :)
 
-** </> by [@nihitb06](https://github.com/nihitb06) **
+**</> by [@nihitb06](https://github.com/nihitb06)**
