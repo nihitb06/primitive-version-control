@@ -128,6 +128,36 @@ def cmd_ls_tree(args):
 
 # }}
 
+# Add checkout command functionality {{
+
+'''
+    We’re going to oversimplify the actual git command to 
+    make our implementation clear and understandable. 
+    We’re also going to add a few safeguards. 
+    Here’s how our version of checkout will work:
+
+    1) It will take two arguments: a commit, and a 
+    directory. Git checkout only needs a commit.
+    2) It will then instantiate the tree in the directory,
+    if and only if the directory is empty. Git is full of 
+    safeguards to avoid deleting data, which would be too 
+    complicated and unsafe to try to reproduce in pvc. 
+    Since the point of pvc is to demonstrate git,
+    not to produce a working implementation, 
+    this limitation is acceptable.
+'''
+
+argsp = argsubparsers.add_parser("checkout", 
+    help="Checkout a commit inside of a directory.")
+
+argsp.add_argument("commit",
+    help="The commit or tree to checkout.")
+
+argsp.add_argument("path",
+    help="The EMPTY directory to checkout on.")
+
+# }}
+
 # }}}
 
 # Git Objects {{{
@@ -602,6 +632,42 @@ def log_graphviz(repo, sha, seen):
         p = p.decode("ascii")
         print ("c_{0} -> c_{1};".format(sha, p))
         log_graphviz(repo, p, seen)
+
+# }}
+
+# Checkout {{
+
+def cmd_checkout(args):
+    repo = repo_find()
+
+    obj = object_read(repo, object_find(repo, args.commit))
+
+    # If the object is a commit, we grab its tree
+    if obj.fmt == b'commit':
+        obj = object_read(repo, obj.kvlm[b'tree'].decode("ascii"))
+
+    # Verify that path is an empty directory
+    if os.path.exists(args.path):
+        if not os.path.isdir(args.path):
+            raise Exception("Not a directory {0}!".format(args.path))
+        if os.listdir(args.path):
+            raise Exception("Not empty {0}!".format(args.path))
+    else:
+        os.makedirs(args.path)
+
+    tree_checkout(repo, obj, os.path.realpath(args.path).encode())
+
+def tree_checkout(repo, tree, path):
+    for item in tree.items:
+        obj = object_read(repo, item.sha)
+        dest = os.path.join(path, item.path)
+
+        if obj.fmt == b'tree':
+            os.mkdir(dest)
+            tree_checkout(repo, obj, dest)
+        elif obj.fmt == b'blob':
+            with open(dest, 'wb') as f:
+                f.write(obj.blobdata)
 
 # }}
 
