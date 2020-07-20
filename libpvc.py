@@ -107,6 +107,15 @@ class GitObject(object):
         # This function MUST be implemented by subclasses.
         raise Exception("Unimplemented!")
 
+def GitBlob(GitObject):
+    fmt = b'blob'
+
+    def serialize(self):
+        return self.blobdata
+
+    def deserialize(self, data):
+        self.blobdata = data
+
 # }}}
 
 # Helper Functions {{{
